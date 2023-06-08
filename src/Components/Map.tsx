@@ -12,7 +12,6 @@ import { Legend } from "./Legend";
 import { Filters } from "./Filters";
 
 export const Map: FC = () => {
-  const [filter, setFilter] = useState<any>(null);
   // Map Styles
   const fillStyle = {
     type: "fill",
@@ -47,6 +46,7 @@ export const Map: FC = () => {
 
   // Map State
 
+  const [filter, setFilter] = useState<any>(null);
   const [coordinates, setCoordinates] = useState<number[] | null>(null);
   const [title, setTitle] = useState<string | null>(null);
   const [magnitude, setMagnitude] = useState<number | null>(null);
@@ -76,8 +76,6 @@ export const Map: FC = () => {
         map.getCanvas().style.cursor = "";
       });
       map.on("click", "earthquakes-layer", (e) => {
-        console.log("event", e);
-        console.log("feat", e.features);
         // Copy coordinates array.
         //@ts-ignore
         const coordinates = e.features[0].geometry.coordinates.slice();
@@ -116,14 +114,6 @@ export const Map: FC = () => {
     return () => setFilter(null);
   }, [activeCountry, map]);
 
-  console.log({
-    coordinates,
-    title,
-    magnitude,
-    timeStamp,
-    popup,
-    filter,
-  });
   return (
     <MapBoxMap
       mapLib={import("mapbox-gl")}
