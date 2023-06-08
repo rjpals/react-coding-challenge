@@ -1,26 +1,24 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import { Map } from "./Components/Map";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+  const queryParams = new URLSearchParams(window.location.search);
+  const token = queryParams.get("access_token");
+  if (token) return <Map />;
+  else
+    return (
+      <div className="App">
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Please add your MapBox token to the URL with the{" "}
+          <strong>
+            <code>?access_token=YOUR_TOKEN_HERE</code>
+          </strong>{" "}
+          url parameter
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+      </div>
+    );
 }
 
 export default App;
