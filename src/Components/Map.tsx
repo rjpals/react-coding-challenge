@@ -84,7 +84,8 @@ export const Map: FC = () => {
         latitude: 40,
         zoom: 3.5,
       }}
-      style={{ width: 900, height: 600 }}
+      style={{ width: "100vw", height: "100vh" }}
+      onRender={(event) => event.target.resize()}
       //mapStyle="mapbox://styles/mapbox/streets-v9" // looks better without the base layer IMO
     >
       {popup && coordinates && (
