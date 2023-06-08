@@ -3,9 +3,14 @@ import logo from "./logo.svg";
 import "./App.css";
 import { Map } from "./Components/Map";
 
+import countries from "./countries.json";
+import earthquakes from "./earthquakes.json";
+
 function App() {
   const queryParams = new URLSearchParams(window.location.search);
   const token = queryParams.get("access_token");
+
+  console.log({ earthquakes, countries });
   if (token) return <Map />;
   else
     return (
