@@ -1,6 +1,8 @@
 import { GeoJSON } from "geojson";
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useMemo } from "react";
 import { Map as MapBoxMap, Source, Layer, useMap, Popup } from "react-map-gl";
+//import turf, { inside, point } from "@turf/turf";
+import * as turf from "@turf/turf";
 
 import { EarthquakeBlurb } from "./EarthquakeBlurb";
 
@@ -10,6 +12,8 @@ import { Legend } from "./Legend";
 import { Filters } from "./Filters";
 
 export const Map: FC = () => {
+  const [filter, setFilter] = useState<any>(null);
+  // Map Styles
   const fillStyle = {
     type: "fill",
     layout: {},
@@ -32,6 +36,7 @@ export const Map: FC = () => {
     id: "earthquakes-layer",
     type: "circle",
     source: "earthquakes",
+    //filter,
     paint: {
       "circle-radius": 4,
       "circle-stroke-width": 1,
@@ -40,11 +45,17 @@ export const Map: FC = () => {
     },
   } as const;
 
+  // Map State
+
   const [coordinates, setCoordinates] = useState<number[] | null>(null);
   const [title, setTitle] = useState<string | null>(null);
   const [magnitude, setMagnitude] = useState<number | null>(null);
   const [timeStamp, setTimeStamp] = useState<number | null>(null);
   const [popup, setPopup] = useState<boolean>(false);
+
+  const [activeCountry, setActiveCountry] = useState<string>("ANY");
+
+  const { map } = useMap();
 
   const clearPopup = () => {
     setCoordinates(null);
@@ -54,7 +65,6 @@ export const Map: FC = () => {
     setPopup(false);
   };
 
-  const { map } = useMap();
   useEffect(() => {
     if (map) {
       map.on("mouseenter", "earthquakes-layer", () => {
@@ -90,6 +100,21 @@ export const Map: FC = () => {
       });
     }
   }, [map]);
+  useEffect(() => {
+    if (activeCountry === "ANY") {
+      setFilter(undefined);
+      return;
+    }
+    //@ts-ignore
+    const country = countries.features.find(
+      (c: any) => c.properties.ISO_A3 === activeCountry
+    );
+    //@ts-ignore
+    setFilter(["within", turf.multiPolygon(country.geometry.coordinates)]);
+
+    // cleanup: unset filter
+    return () => setFilter(null);
+  }, [activeCountry, map]);
 
   console.log({
     coordinates,
@@ -97,6 +122,7 @@ export const Map: FC = () => {
     magnitude,
     timeStamp,
     popup,
+    filter,
   });
   return (
     <MapBoxMap
@@ -132,10 +158,19 @@ export const Map: FC = () => {
         <Layer {...outlineStyle} />
       </Source>
       <Source id="earthquake-source" type="geojson" data={earthquakes as any}>
-        <Layer {...earthquakeLayerStyle} />
+        {filter ? (
+          <Layer {...earthquakeLayerStyle} filter={filter} />
+        ) : (
+          <Layer {...earthquakeLayerStyle} />
+        )}
       </Source>
       <Legend title={title} magnitude={magnitude} timeStamp={timeStamp} />
-      <Filters activeCountry="US" />
+      <Filters
+        activeCountry={activeCountry}
+        onChange={(country) => {
+          setActiveCountry(country);
+        }}
+      />
     </MapBoxMap>
   );
 };
