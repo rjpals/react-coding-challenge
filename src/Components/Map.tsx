@@ -1,5 +1,5 @@
 import { GeoJSON } from "geojson";
-import { FC, useState, useEffect, useRef } from "react";
+import { FC, useState, useEffect } from "react";
 import { Map as MapBoxMap, Source, Layer, useMap, Popup } from "react-map-gl";
 
 import { EarthquakeBlurb } from "./EarthquakeBlurb";
@@ -71,8 +71,6 @@ export const Map: FC = () => {
         // Copy coordinates array.
         //@ts-ignore
         const coordinates = e.features[0].geometry.coordinates.slice();
-        //@ts-ignore
-        const description = e.features[0].properties.description;
 
         // Ensure that if the map is zoomed out such that multiple
         // copies of the feature are visible, the popup appears
