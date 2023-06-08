@@ -1,10 +1,13 @@
-import { FeatureCollection, GeoJSON } from "geojson";
-import React, { FC, useState, useEffect, useRef } from "react";
+import { GeoJSON } from "geojson";
+import { FC, useState, useEffect, useRef } from "react";
 import { Map as MapBoxMap, Source, Layer, useMap, Popup } from "react-map-gl";
-import mapboxgl from "mapbox-gl";
+
+import { EarthquakeBlurb } from "./EarthquakeBlurb";
 
 import countries from "../countries.json";
 import earthquakes from "../earthquakes.json";
+import { Legend } from "./Legend";
+import { Filters } from "./Filters";
 
 export const Map: FC = () => {
   const fillStyle = {
@@ -37,9 +40,19 @@ export const Map: FC = () => {
     },
   } as const;
 
-  const [description, setDescription] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<number[] | null>(null);
+  const [title, setTitle] = useState<string | null>(null);
+  const [magnitude, setMagnitude] = useState<number | null>(null);
+  const [timeStamp, setTimeStamp] = useState<number | null>(null);
   const [popup, setPopup] = useState<boolean>(false);
+
+  const clearPopup = () => {
+    setCoordinates(null);
+    setTitle(null);
+    setMagnitude(null);
+    setTimeStamp(null);
+    setPopup(false);
+  };
 
   const { map } = useMap();
   useEffect(() => {
@@ -53,7 +66,8 @@ export const Map: FC = () => {
         map.getCanvas().style.cursor = "";
       });
       map.on("click", "earthquakes-layer", (e) => {
-        console.log(e);
+        console.log("event", e);
+        console.log("feat", e.features);
         // Copy coordinates array.
         //@ts-ignore
         const coordinates = e.features[0].geometry.coordinates.slice();
@@ -68,13 +82,24 @@ export const Map: FC = () => {
         }
 
         setCoordinates(coordinates);
-        setDescription(description);
+        //@ts-ignore
+        setTitle(e.features[0].properties.title);
+        //@ts-ignore
+        setMagnitude(e.features[0].properties.mag);
+        //@ts-ignore
+        setTimeStamp(e.features[0].properties.time);
         setPopup(true);
       });
     }
   }, [map]);
 
-  console.log(coordinates, description, popup);
+  console.log({
+    coordinates,
+    title,
+    magnitude,
+    timeStamp,
+    popup,
+  });
   return (
     <MapBoxMap
       mapLib={import("mapbox-gl")}
@@ -88,20 +113,20 @@ export const Map: FC = () => {
       onRender={(event) => event.target.resize()}
       //mapStyle="mapbox://styles/mapbox/streets-v9" // looks better without the base layer IMO
     >
-      {popup && coordinates && (
+      {popup && coordinates && title && (
         <Popup
           longitude={coordinates[0]}
           latitude={coordinates[1]}
           closeButton={true}
           closeOnClick={false}
-          onClose={() => {
-            setPopup(false);
-            setCoordinates(null);
-            setDescription(null);
-          }}
+          onClose={clearPopup}
           anchor="top"
         >
-          Testing
+          <EarthquakeBlurb
+            title={title}
+            magnitude={magnitude}
+            timeStamp={timeStamp}
+          />
         </Popup>
       )}
       <Source id="countries-source" type="geojson" data={countries as GeoJSON}>
@@ -111,7 +136,8 @@ export const Map: FC = () => {
       <Source id="earthquake-source" type="geojson" data={earthquakes as any}>
         <Layer {...earthquakeLayerStyle} />
       </Source>
-      <div className="Legend">hello world</div>
+      <Legend title={title} magnitude={magnitude} timeStamp={timeStamp} />
+      <Filters activeCountry="US" />
     </MapBoxMap>
   );
 };

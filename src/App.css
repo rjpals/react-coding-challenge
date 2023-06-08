@@ -8,8 +8,36 @@
   position: absolute;
   left: 16px;
   top: 16px;
+  width: 320px;
+  min-height: 160px;
   background-color: white;
   padding: 4px 8px;
-  border-radius: 10px;
-  border: 1px black;
+  border-radius: 8px;
+  border: 2px #212f4f solid;
+  color: #212f4f;
+}
+
+@media screen and (max-width: 720px) {
+  .Legend {
+    display: none
+  }
+}
+
+.Filters {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 320px;
+  min-height: 160px;
+  background-color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 2px #212f4f solid;
+  color: #212f4f;
+}
+
+.mapboxgl-popup-content {
+  border-radius: 8px;
+  border: 2px #212f4f solid;
+  color: #212f4f;
 }

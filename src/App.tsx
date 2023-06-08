@@ -12,7 +12,6 @@ function App() {
   const queryParams = new URLSearchParams(window.location.search);
   const token = queryParams.get("access_token");
 
-  console.log({ earthquakes, countries });
   if (token)
     return (
       <div className="App">
